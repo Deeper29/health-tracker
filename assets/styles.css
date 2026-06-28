@@ -74,6 +74,7 @@ input[type="file"] { display: none; }
 .metric-card { background: var(--surface); border: 0; border-radius: 8px; padding: 16px; min-height: 132px; }
 .metric-card .meta { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 14px; color: var(--muted); font-size: 13px; }
 .badge { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 650; color: #fff; }
+.status-item .badge, .metric-card .badge, td .badge { color: #fff; }
 .ok { background: var(--green); }
 .high, .low { background: var(--red); }
 .danger { background: var(--red); }
