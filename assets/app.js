@@ -69,6 +69,11 @@ init();
 
 async function init() {
   bindEvents();
+  if (restoreSessionData()) {
+    removeUnlockPanel();
+    render();
+    return;
+  }
   renderLockedState();
   await loadEncryptedBundle();
 }
@@ -122,7 +127,8 @@ async function unlockData() {
   try {
     const decrypted = await decryptBundle(encryptedBundle, password);
     state = { ...structuredClone(emptyState), ...decrypted };
-    els.unlockPanel.hidden = true;
+    sessionStorage.setItem("health-tracker-unlocked-session-v1", JSON.stringify(state));
+    removeUnlockPanel();
     els.contentShell.classList.remove("is-locked");
     render();
   } catch {
@@ -155,6 +161,23 @@ async function decryptBundle(bundle, password) {
   );
   const plainBuffer = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
   return JSON.parse(new TextDecoder().decode(plainBuffer));
+}
+
+function restoreSessionData() {
+  const raw = sessionStorage.getItem("health-tracker-unlocked-session-v1");
+  if (!raw) return false;
+  try {
+    state = { ...structuredClone(emptyState), ...JSON.parse(raw) };
+    els.contentShell.classList.remove("is-locked");
+    return true;
+  } catch {
+    sessionStorage.removeItem("health-tracker-unlocked-session-v1");
+    return false;
+  }
+}
+
+function removeUnlockPanel() {
+  els.unlockPanel?.remove();
 }
 
 function renderLockedState() {
@@ -283,12 +306,33 @@ function renderChart() {
       "stroke-linejoin": "round"
     });
     metricRows.forEach((item) => {
+      const cx = x(item.date);
+      const cy = y(item.value);
+      const status = statusFor(item);
+      const isAbnormal = status.className && status.className !== "ok";
       appendSvg(svg, "circle", {
-        cx: x(item.date),
-        cy: y(item.value),
-        r: 4,
-        fill: colors[index % colors.length]
+        cx,
+        cy,
+        r: isAbnormal ? 7 : 4,
+        fill: isAbnormal ? "#fff" : colors[index % colors.length],
+        stroke: isAbnormal ? "#F65A5A" : "none",
+        "stroke-width": isAbnormal ? 3 : 0
       });
+      if (isAbnormal) {
+        appendSvg(svg, "circle", {
+          cx,
+          cy,
+          r: 3,
+          fill: "#F65A5A"
+        });
+        drawAbnormalLabel(svg, {
+          x: cx,
+          y: cy,
+          label: status.label,
+          alignLeft: cx > 820,
+          offsetY: -12 - (index % 2) * 16
+        });
+      }
     });
   });
 
@@ -324,7 +368,31 @@ function renderChart() {
         </span>
       `;
     })
-    .join("");
+    .join("") + `<span class="legend-item"><span class="legend-ring"></span>超出参考范围</span>`;
+}
+
+function drawAbnormalLabel(svg, { x, y, label, alignLeft, offsetY }) {
+  const labelWidth = 38;
+  const labelX = alignLeft ? x - labelWidth - 10 : x + 10;
+  const labelY = Math.max(20, y + offsetY);
+  appendSvg(svg, "rect", {
+    x: labelX,
+    y: labelY - 15,
+    width: labelWidth,
+    height: 20,
+    rx: 10,
+    fill: "#fff",
+    stroke: "#F65A5A",
+    "stroke-width": 1
+  });
+  appendSvg(svg, "text", {
+    x: labelX + labelWidth / 2,
+    y: labelY - 1,
+    "text-anchor": "middle",
+    fill: "#F65A5A",
+    "font-size": 12,
+    "font-weight": 700
+  }).textContent = label;
 }
 
 function renderLabs() {
@@ -472,10 +540,7 @@ function formatRange(item) {
 }
 
 function formatCatalogRange(code) {
-  const metric = metricCatalog[code];
-  if (!metric) return "按报告/医生目标";
-  const item = { code, min: metric.min, max: metric.max };
-  return formatRange(item);
+  return formatRange({ code });
 }
 
 function formatMedicationPeriod(item) {
