@@ -246,6 +246,13 @@ main {
   font-size: 20px;
 }
 
+.status-item small {
+  display: block;
+  margin: 2px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .tabs {
   margin: 20px 0;
   padding: 6px;
@@ -339,6 +346,14 @@ td .badge {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+}
+
+.legend-ring {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--red);
+  border-radius: 50%;
+  background: #fff;
 }
 
 .table-wrap {
