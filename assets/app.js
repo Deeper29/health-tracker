@@ -1,4 +1,5 @@
 const DATA_URL = "./data/records.enc.json?v=20260628a";
+const SESSION_KEY = "health-tracker-unlocked-session-v1";
 
 const metricCatalog = {
   TG: { name: "甘油三酯", group: "lipids", unit: "mmol/L", min: null, max: 1.7 },
@@ -127,13 +128,30 @@ async function unlockData() {
   try {
     const decrypted = await decryptBundle(encryptedBundle, password);
     state = { ...structuredClone(emptyState), ...decrypted };
-    sessionStorage.setItem("health-tracker-unlocked-session-v1", JSON.stringify(state));
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
     removeUnlockPanel();
     els.contentShell.classList.remove("is-locked");
     render();
   } catch {
     els.unlockMessage.textContent = "密码不正确，或数据文件已损坏。";
   }
+}
+
+function restoreSessionData() {
+  const raw = sessionStorage.getItem(SESSION_KEY);
+  if (!raw) return false;
+  try {
+    state = { ...structuredClone(emptyState), ...JSON.parse(raw) };
+    els.contentShell.classList.remove("is-locked");
+    return true;
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY);
+    return false;
+  }
+}
+
+function removeUnlockPanel() {
+  els.unlockPanel?.remove();
 }
 
 async function decryptBundle(bundle, password) {
@@ -161,23 +179,6 @@ async function decryptBundle(bundle, password) {
   );
   const plainBuffer = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
   return JSON.parse(new TextDecoder().decode(plainBuffer));
-}
-
-function restoreSessionData() {
-  const raw = sessionStorage.getItem("health-tracker-unlocked-session-v1");
-  if (!raw) return false;
-  try {
-    state = { ...structuredClone(emptyState), ...JSON.parse(raw) };
-    els.contentShell.classList.remove("is-locked");
-    return true;
-  } catch {
-    sessionStorage.removeItem("health-tracker-unlocked-session-v1");
-    return false;
-  }
-}
-
-function removeUnlockPanel() {
-  els.unlockPanel?.remove();
 }
 
 function renderLockedState() {
@@ -540,7 +541,10 @@ function formatRange(item) {
 }
 
 function formatCatalogRange(code) {
-  return formatRange({ code });
+  const metric = metricCatalog[code];
+  if (!metric) return "按报告/医生目标";
+  const item = { code, min: metric.min, max: metric.max };
+  return formatRange(item);
 }
 
 function formatMedicationPeriod(item) {
