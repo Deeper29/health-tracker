@@ -60,7 +60,6 @@ const els = {
   trendChart: document.getElementById("trendChart"),
   chartLegend: document.getElementById("chartLegend"),
   timelineList: document.getElementById("timelineList"),
-  labTable: document.getElementById("labTable"),
   medTable: document.getElementById("medTable"),
   exportBtn: document.getElementById("exportBtn"),
   printBtn: document.getElementById("printBtn")
@@ -197,7 +196,6 @@ function render() {
   renderStatus();
   renderChartControls();
   renderChart();
-  renderLabs();
   renderTimeline();
   renderMeds();
 }
@@ -396,53 +394,84 @@ function drawAbnormalLabel(svg, { x, y, label, alignLeft, offsetY }) {
   }).textContent = label;
 }
 
-function renderLabs() {
-  const labs = [...state.labs].sort((a, b) => b.date.localeCompare(a.date));
-  els.labTable.innerHTML = labs.length
-    ? labs
-        .map((item) => {
-          const metric = metricCatalog[item.code];
-          const status = statusFor(item);
-          return `
-            <tr>
-              <td>${item.date}</td>
-              <td>${metric.name}<br><span class="badge ${status.className}">${status.label}</span></td>
-              <td>${formatNumber(item.value)} ${item.unit || metric.unit}</td>
-              <td>${formatRange(item)}</td>
-              <td>${escapeHtml(item.report || "")}</td>
-            </tr>
-          `;
-        })
-        .join("")
-    : '<tr><td colspan="5">暂无指标记录。</td></tr>';
+function renderTimeline() {
+  const dates = [...new Set([
+    ...state.labs.map((item) => item.date),
+    ...state.events.map((item) => item.date)
+  ])].filter(Boolean).sort((a, b) => b.localeCompare(a));
+
+  els.timelineList.innerHTML = dates.length
+    ? dates.map(renderTimelineDate).join("")
+    : '<p class="empty">暂无时间线记录。</p>';
 }
 
-function renderTimeline() {
-  const reportEvents = [...new Set(state.labs.map((item) => item.date))].map((date) => {
-    const abnormal = state.labs.filter((item) => item.date === date && statusFor(item).className !== "ok");
-    return {
-      id: `report-${date}`,
-      date,
-      title: `复查报告：${date}`,
-      body: abnormal.length
-        ? `异常或需关注：${abnormal.map((item) => metricCatalog[item.code].name).join("、")}`
-        : "本次记录指标未发现超出参考范围。"
-    };
-  });
-  const allEvents = [...state.events, ...reportEvents].sort((a, b) => b.date.localeCompare(a.date));
-  els.timelineList.innerHTML = allEvents.length
-    ? allEvents
-        .map(
-          (item) => `
-            <article class="event">
-              <time>${item.date}</time>
-              <h3>${escapeHtml(item.title)}</h3>
-              <p>${escapeHtml(item.body || "")}</p>
-            </article>
-          `
-        )
-        .join("")
-    : '<p class="empty">暂无时间线记录。</p>';
+function renderTimelineDate(date) {
+  const labs = state.labs
+    .filter((item) => item.date === date)
+    .sort((a, b) => metricSortIndex(a.code) - metricSortIndex(b.code));
+  const events = state.events.filter((item) => item.date === date);
+  const abnormal = labs.filter((item) => statusFor(item).className !== "ok");
+  const reports = [...new Set(labs.map((item) => item.report).filter(Boolean))];
+
+  const eventBlock = events.length
+    ? `
+      <div class="event-section">
+        <h4>治疗方案调整</h4>
+        ${events.map((item) => `
+          <p><strong>${escapeHtml(item.title)}</strong>${item.body ? `：${escapeHtml(item.body)}` : ""}</p>
+        `).join("")}
+      </div>
+    `
+    : "";
+
+  const labsBlock = labs.length
+    ? `
+      <div class="event-section">
+        <h4>复查指标${reports.length ? ` · ${reports.map(escapeHtml).join("、")}` : ""}</h4>
+        <p class="event-summary">
+          ${abnormal.length
+            ? `异常或需关注：${abnormal.map((item) => metricCatalog[item.code].name).join("、")}`
+            : "本次记录指标未发现超出参考范围。"}
+        </p>
+        <div class="timeline-metrics">
+          ${labs.map(renderTimelineMetric).join("")}
+        </div>
+      </div>
+    `
+    : "";
+
+  return `
+    <article class="event">
+      <time>${date}</time>
+      <h3>${labs.length ? "复查与治疗记录" : "治疗方案记录"}</h3>
+      ${eventBlock}
+      ${labsBlock}
+    </article>
+  `;
+}
+
+function renderTimelineMetric(item) {
+  const metric = metricCatalog[item.code];
+  const status = statusFor(item);
+  return `
+    <div class="timeline-metric">
+      <span>${metric.name}</span>
+      <strong>${formatNumber(item.value)} ${item.unit || metric.unit}</strong>
+      <small>参考：${formatRange(item)}</small>
+      <span class="badge ${status.className}">${status.label}</span>
+    </div>
+  `;
+}
+
+function metricSortIndex(code) {
+  const order = [
+    "TG", "TC", "HDL_C", "LDL_C", "NON_HDL", "RLP_C",
+    "ALT", "AST", "GGT", "TBIL", "CHE",
+    "CK", "CREA", "EGFR", "UA",
+    "TSH", "FT4", "FT3"
+  ];
+  const index = order.indexOf(code);
+  return index === -1 ? order.length : index;
 }
 
 function renderMeds() {
