@@ -51,9 +51,9 @@ const els = {
   unlockMessage: document.getElementById("unlockMessage"),
   contentShell: document.getElementById("contentShell"),
   latestDate: document.getElementById("latestDate"),
+  doctorHighlights: document.getElementById("doctorHighlights"),
   profileSummary: document.getElementById("profileSummary"),
   currentMeds: document.getElementById("currentMeds"),
-  attentionSummary: document.getElementById("attentionSummary"),
   statusStrip: document.getElementById("statusStrip"),
   chartGroups: document.getElementById("chartGroups"),
   trendChart: document.getElementById("trendChart"),
@@ -200,7 +200,9 @@ function renderDoctorSummary() {
   if (alt) parts.push(`ALT ${formatNumber(alt.value)} ${alt.unit || metricCatalog.ALT.unit}，仍略高于参考范围。`);
   if (ck && statusFor(ck).className === "ok") parts.push("肌酸激酶正常。");
   if (kidney && statusFor(kidney).className === "ok") parts.push("肌酐在参考范围内。");
-  els.attentionSummary.textContent = parts.join(" ") || "-";
+  els.doctorHighlights.innerHTML = (parts.length ? parts : ["暂无需要优先提示的异常。"])
+    .map((item) => `<li>${escapeHtml(item)}</li>`)
+    .join("");
 }
 
 function renderStatus() {
@@ -214,6 +216,7 @@ function renderStatus() {
         <div class="status-item">
           <span>${metric.name}</span>
           <strong>${item ? `${formatNumber(item.value)} ${item.unit || metric.unit}` : "--"}</strong>
+          <small>参考：${item ? formatRange(item) : formatCatalogRange(code)}</small>
           <span class="badge ${status.className}">${status.label}</span>
         </div>
       `;
@@ -466,6 +469,13 @@ function formatRange(item) {
   if (typeof max === "number") return `<${formatNumber(max)}`;
   if (typeof min === "number") return `>${formatNumber(min)}`;
   return "按报告/医生目标";
+}
+
+function formatCatalogRange(code) {
+  const metric = metricCatalog[code];
+  if (!metric) return "按报告/医生目标";
+  const item = { code, min: metric.min, max: metric.max };
+  return formatRange(item);
 }
 
 function formatMedicationPeriod(item) {
