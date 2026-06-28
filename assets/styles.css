@@ -88,6 +88,10 @@ main {
   flex-wrap: wrap;
 }
 
+.segmented {
+  margin-bottom: 16px;
+}
+
 .primary,
 .secondary,
 .tab,
