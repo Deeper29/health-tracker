@@ -73,10 +73,10 @@ input[type="file"] { display: none; }
 .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .metric-card { background: var(--surface); border: 0; border-radius: 8px; padding: 16px; min-height: 132px; }
 .metric-card .meta { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 14px; color: var(--muted); font-size: 13px; }
-.badge { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 650; }
-.ok { color: #06351f; background: var(--green); }
-.high, .low { color: #fff; background: var(--red); }
-.danger { color: #fff; background: var(--red); }
+.badge { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 650; color: #fff; }
+.ok { background: var(--green); }
+.high, .low { background: var(--red); }
+.danger { background: var(--red); }
 .chart-wrap { background: var(--surface); border: 0; border-radius: 8px; min-height: 360px; padding: 12px; }
 #trendChart { width: 100%; height: 340px; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
