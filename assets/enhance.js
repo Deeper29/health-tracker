@@ -8,6 +8,15 @@ const contentShell = document.getElementById("contentShell");
 const attentionSummary = document.getElementById("attentionSummary");
 const doctorHighlights = document.getElementById("doctorHighlights");
 
+const metricReferenceRanges = {
+  "甘油三酯": "<1.7",
+  "低密度脂蛋白胆固醇": "<3.4",
+  "丙氨酸氨基转移酶": "7-40",
+  "肌酸激酶": "40-200",
+  "肌酐": "41-73",
+  "促甲状腺激素": "0.56-5.91"
+};
+
 let submittedPassword = "";
 
 function removeUnlockPanelAfterLogin() {
@@ -29,6 +38,27 @@ function renderDoctorHighlights() {
   doctorHighlights.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
+function renderStatusReferences() {
+  document.querySelectorAll(".status-item").forEach((item) => {
+    const hasReference = [...item.querySelectorAll("small")].some((node) =>
+      node.textContent.trim().startsWith("参考")
+    );
+    if (item.querySelector(".reference-range") || hasReference) return;
+    const name = item.querySelector("span")?.textContent.trim();
+    const range = metricReferenceRanges[name];
+    const badge = item.querySelector(".badge");
+    if (!range || !badge) return;
+    const ref = document.createElement("small");
+    ref.className = "reference-range";
+    ref.textContent = `参考：${range}`;
+    ref.style.display = "block";
+    ref.style.margin = "2px 0 8px";
+    ref.style.color = "var(--muted)";
+    ref.style.fontSize = "12px";
+    item.insertBefore(ref, badge);
+  });
+}
+
 function tryAutoUnlock() {
   const savedPassword = sessionStorage.getItem(SESSION_PASSWORD_KEY);
   if (!savedPassword || !passwordInput || !unlockForm || !unlockMessage) return;
@@ -46,6 +76,7 @@ unlockForm?.addEventListener("submit", () => {
 const observer = new MutationObserver(() => {
   removeUnlockPanelAfterLogin();
   renderDoctorHighlights();
+  renderStatusReferences();
   tryAutoUnlock();
 });
 
@@ -55,6 +86,7 @@ if (attentionSummary) observer.observe(attentionSummary, { childList: true, char
 
 removeUnlockPanelAfterLogin();
 renderDoctorHighlights();
+renderStatusReferences();
 tryAutoUnlock();
 
 function escapeHtml(value) {
