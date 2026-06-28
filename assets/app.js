@@ -46,8 +46,6 @@ let activeChartGroup = "lipids";
 
 const els = {
   latestDate: document.getElementById("latestDate"),
-  nextReview: document.getElementById("nextReview"),
-  reviewItems: document.getElementById("reviewItems"),
   statusStrip: document.getElementById("statusStrip"),
   metricGrid: document.getElementById("metricGrid"),
   chartGroups: document.getElementById("chartGroups"),
@@ -162,8 +160,6 @@ function populateMetricSelect() {
 function render() {
   const latestDate = getLatestDate();
   els.latestDate.textContent = latestDate || "暂无记录";
-  els.nextReview.textContent = state.nextReviewDate || "待设置";
-  els.reviewItems.textContent = state.profile?.reviewPlan || emptyState.profile.reviewPlan;
   renderStatus();
   renderMetricCards();
   renderChartControls();
