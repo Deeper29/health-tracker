@@ -46,6 +46,7 @@ main { width: min(1180px, calc(100% - 32px)); margin: 24px auto 56px; }
   color: var(--text);
 }
 .primary { border-color: var(--blue); background: var(--blue); color: #fff; }
+#addLabBtn { border-color: #000; background: #000; color: #fff; }
 .secondary:hover, .tab:hover, .segment:hover { border-color: #9eb4c9; }
 .file-label { display: inline-flex; align-items: center; }
 input[type="file"] { display: none; }
@@ -73,9 +74,9 @@ input[type="file"] { display: none; }
 .metric-card { background: var(--surface); border: 0; border-radius: 8px; padding: 16px; min-height: 132px; }
 .metric-card .meta { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 14px; color: var(--muted); font-size: 13px; }
 .badge { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 650; }
-.ok { color: var(--green); background: rgba(15, 220, 120, 0.12); }
-.high, .low { color: var(--red); background: rgba(246, 90, 90, 0.12); }
-.danger { color: var(--red); background: rgba(246, 90, 90, 0.12); }
+.ok { color: #06351f; background: var(--green); }
+.high, .low { color: #fff; background: var(--red); }
+.danger { color: #fff; background: var(--red); }
 .chart-wrap { background: var(--surface); border: 0; border-radius: 8px; min-height: 360px; padding: 12px; }
 #trendChart { width: 100%; height: 340px; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
