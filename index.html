@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>血脂与用药安全追踪</title>
-    <link rel="stylesheet" href="./assets/styles.css?v=20260628h" />
+    <link rel="stylesheet" href="./assets/styles.css?v=20260628i" />
   </head>
   <body>
     <header class="app-header">
@@ -58,8 +58,7 @@
         </section>
 
         <nav class="tabs" aria-label="模块切换">
-          <button class="tab active" data-view="trends" type="button">趋势</button>
-          <button class="tab" data-view="labs" type="button">指标</button>
+          <button class="tab active" data-view="trends" type="button">趋势图</button>
           <button class="tab" data-view="timeline" type="button">时间线</button>
           <button class="tab" data-view="meds" type="button">用药</button>
         </nav>
@@ -76,31 +75,10 @@
           <div class="legend" id="chartLegend"></div>
         </section>
 
-        <section class="view" id="labs">
-          <div class="section-heading">
-            <h2>全部指标</h2>
-            <p>按检查日期倒序展示，异常项自动标记。</p>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>日期</th>
-                  <th>指标</th>
-                  <th>结果</th>
-                  <th>参考范围</th>
-                  <th>报告</th>
-                </tr>
-              </thead>
-              <tbody id="labTable"></tbody>
-            </table>
-          </div>
-        </section>
-
         <section class="view" id="timeline">
           <div class="section-heading">
             <h2>治疗时间线</h2>
-            <p>检查结果、加药和方案调整放在同一条线里。</p>
+            <p>按日期合并展示检查指标和治疗方案调整。</p>
           </div>
           <div class="timeline" id="timelineList"></div>
         </section>
@@ -128,7 +106,7 @@
       </div>
     </main>
 
-    <script src="./assets/app.js?v=20260628g"></script>
+    <script src="./assets/app.js?v=20260628i"></script>
     <script src="./assets/enhance.js?v=20260628b"></script>
   </body>
 </html>
